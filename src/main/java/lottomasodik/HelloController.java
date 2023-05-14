@@ -1,17 +1,15 @@
 package lottomasodik;
 
-import com.lottohist.model.FinalResult;
-import com.lottohist.model.Huzas;
-import com.lottohist.model.Popup;
+import com.lottohist.model.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
 
+import javafx.scene.layout.VBox;
+import org.jdbi.v3.core.Jdbi;
 import java.io.*;
 import java.net.*;
 import java.time.LocalDate;
@@ -24,16 +22,19 @@ public class HelloController {
     Popup popup = new Popup();
     Integer actualWeek;
     @FXML
-    private VBox resultVbox;
+    private VBox resultVbox, menuVBox;
     @FXML
-    private Label welcomeText, talalatDarabLabel;
+    ListView gyakorisagListView,gyakorisagActualListView;
+    @FXML
+    private Label welcomeText, suggestLabel;
     @FXML
     private Button startButton;
 
     @FXML
-    private AnchorPane menuAnchor, generalAnchor, tippAnchor, actualAnchor, startPane;
+    ComboBox orderCombo,orderComboActual;
     @FXML
-    private HBox menuHBox;
+    private AnchorPane menuAnchor, actualAnchor, tippAnchor, statAnchor, mainAnchor;
+
     @FXML
     private TextField textNum1,textNum2,textNum3,textNum4,textNum5;
     @FXML
@@ -41,8 +42,11 @@ public class HelloController {
     @FXML
     protected void onStartButtonClick() throws IOException, URISyntaxException {
         Calendar cal = Calendar.getInstance();
+        DataBase db = new DataBase();
+        db.createDb();
 
         actualWeek = cal.get(Calendar.WEEK_OF_YEAR);
+
 
         try {
             File myObj = new File("src/main/resources/otos.csv");
@@ -50,7 +54,7 @@ public class HelloController {
             huzasokTombbeToltese(myReader);  // SORSOLÁSOK BETÖLTÉSE a huzasok LISTÁBA
             myReader.close();
             startButton.setVisible(false); // START BUTTON KIKAPCSOLÁS
-            anchorPaneList.add(tippAnchor);anchorPaneList.add(menuAnchor);anchorPaneList.add(menuAnchor);
+            anchorPaneList.add(tippAnchor);anchorPaneList.add(statAnchor);anchorPaneList.add(mainAnchor);anchorPaneList.add(actualAnchor);
             activatePane("menuAnchor");
             createMenu(); // MENÜ KÉSZÍTÉS
 
@@ -68,7 +72,7 @@ public class HelloController {
         radio3Button.setVisible(false);
         radio4Button.setVisible(false);
         radio5Button.setVisible(false);
-        talalatDarabLabel.setText("");
+
         resultVbox.getChildren().clear();
         int nums[] = new int[5];
         int db=0;
@@ -110,7 +114,7 @@ public class HelloController {
         radio3Button.setVisible(false);
         radio4Button.setVisible(false);
         radio5Button.setVisible(false);
-        talalatDarabLabel.setText("");
+
         resultVbox.getChildren().clear();
         radio1Button.setSelected(false);
         radio2Button.setSelected(false);
@@ -215,6 +219,8 @@ public class HelloController {
 
         MenuItem mTippCustom = new MenuItem("Saját / Random tippek");
         mTippCustom.setOnAction(event);
+        mNumAppearGeneral.setOnAction(event);
+        mNumAppearActual.setOnAction(event);
 
     // create a menubar
         MenuBar mb = new MenuBar();
@@ -223,8 +229,8 @@ public class HelloController {
         mTippCheck.getItems().add(mTippCustom);
         mb.getMenus().add(mTippCheck);
         mb.getMenus().add(mNumAppear);
-        menuHBox.getChildren().add(mb);
-        menuHBox.setVisible(true);
+        menuVBox.getChildren().add(mb);
+        menuVBox.setVisible(true);
     }
     public Boolean isNumberCheck(String tipp){
         boolean result = true;
@@ -270,9 +276,8 @@ public class HelloController {
     }
     private void eredmenyKiir(List<Huzas> talalatok) {
         resultVbox.getChildren().clear();
-        talalatDarabLabel.setText("");
-        talalatDarabLabel.setText(talalatok.size()+" találat");
-        System.out.println("DArabszám: "+talalatok.size());
+
+        System.out.println("Darabszám: "+talalatok.size());
         for (Huzas x:talalatok){
             TextField textDate = new TextField(x.getYear()+" - "+x.getWeek()+". hét:    "+x.numbersKiir());
             textDate.setEditable(false);
@@ -280,15 +285,109 @@ public class HelloController {
         }
     }
 
+    @FXML
+    private void getSelectedOrder(){
+
+    }
+
+
+    @FXML
+    protected void getSelectedOrder(ActionEvent event){  // ÁLTALÁNOS COMBOBOX EVENTEK
+
+        if (orderCombo.getSelectionModel().getSelectedIndex()==0){
+            gyakorisagListView.getItems().clear();
+            Analyzer gyakorisag = new Analyzer(huzasok);
+            for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByKey()){
+                gyakorisagListView.getItems().add(x);
+            }
+        }
+        if (orderCombo.getSelectionModel().getSelectedIndex()==1){
+            gyakorisagListView.getItems().clear();
+            Analyzer gyakorisag = new Analyzer(huzasok);
+            for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByKeyRev()){
+                gyakorisagListView.getItems().add(x);
+            }
+        }
+        if (orderCombo.getSelectionModel().getSelectedIndex()==2){
+            gyakorisagListView.getItems().clear();
+            Analyzer gyakorisag = new Analyzer(huzasok);
+            for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByValue()){
+                gyakorisagListView.getItems().add(x);
+            }
+        }
+        if (orderCombo.getSelectionModel().getSelectedIndex()==3){
+            gyakorisagListView.getItems().clear();
+            Analyzer gyakorisag = new Analyzer(huzasok);
+            for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByValueRev()){
+                gyakorisagListView.getItems().add(x);
+            }
+        }
+    }
+
+    @FXML
+    protected void getSelectedOrderActual(ActionEvent event){
+
+        List<Huzas> actualHuzasok = new ArrayList<>();
+        if (orderComboActual.getSelectionModel().getSelectedIndex()==0){
+            gyakorisagActualListView.getItems().clear();
+
+            for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
+                if (x.getWeek()==actualWeek) {
+                    actualHuzasok.add(x);
+                }
+
+            }
+
+            Analyzer gyakorisag = new Analyzer(actualHuzasok);
+            for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByKey()){
+                gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
+            }
+        }
+        if (orderComboActual.getSelectionModel().getSelectedIndex()==1){
+            gyakorisagActualListView.getItems().clear();
+
+            for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
+                if (x.getWeek()==actualWeek) {
+                    actualHuzasok.add(x);
+                }
+
+            }
+
+            Analyzer gyakorisag = new Analyzer(actualHuzasok);
+            for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByValue()){
+                gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
+            }
+        }
+        if (orderComboActual.getSelectionModel().getSelectedIndex()==2){
+            gyakorisagActualListView.getItems().clear();
+
+            for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
+                if (x.getWeek()==actualWeek) {
+                    actualHuzasok.add(x);
+                }
+
+            }
+            Analyzer gyakorisag = new Analyzer(actualHuzasok);
+            for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByValueRev()){
+                gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
+            }
+        }
+
+    }
+
     EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
         public void handle(ActionEvent e) {
 
-            if (((MenuItem) e.getSource()).getText().equals("Saját / Random tippek")) {
+            if (((MenuItem) e.getSource()).getText().equals("Saját / Random tippek")) activatePane("tippAnchor");
+            if (((MenuItem) e.getSource()).getText().equals("Általános")) {activatePane("statAnchor");orderCombo.getItems().add("szám növekvő");
+                orderCombo.getItems().add("szám csökkenő");
+                orderCombo.getItems().add("előfodulás alapján növekvő");
+                orderCombo.getItems().add("előfodulás alapján csökkenő");}
+            if (((MenuItem) e.getSource()).getText().equals("Aktuális hét")) {activatePane("actualAnchor");orderComboActual.getItems().add("szám szerint növekvő");
+                orderComboActual.getItems().add("gyakoriság szerint növekvő");
+                orderComboActual.getItems().add("gyakoriság szerint csökkenő");}
 
-                activatePane("tippAnchor");
 
-
-            }
         }
     };
 }
