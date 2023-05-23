@@ -46,10 +46,10 @@ public class HelloController {
     @FXML
     protected void saveTipp() throws JsonProcessingException {
 
-        /*var sd = new SaveData("valami", Arrays.asList(1,2,3,4,5));
+        var sd = new SaveData("valami", Arrays.asList(1,2,3,4,5));
         var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-        System.out.println(objectMapper.writeValueAsString(sd));*/
-        Torol torol = new Torol();
+        System.out.println(objectMapper.writeValueAsString(sd));
+       /* Torol torol = new Torol();
         torol.setName("Valami");
         torol.setAge(12);
         ObjectMapper mapper = new ObjectMapper();
@@ -60,6 +60,8 @@ public class HelloController {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }
+
+        */
     }
     @FXML
     protected void onStartButtonClick() throws IOException, URISyntaxException {
