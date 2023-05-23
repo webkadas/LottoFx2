@@ -1,5 +1,6 @@
 package lottomasodik;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.lottohist.model.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -7,20 +8,21 @@ import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
-
 import javafx.scene.layout.VBox;
-import org.jdbi.v3.core.Jdbi;
 import java.io.*;
 import java.net.*;
 import java.time.LocalDate;
 import java.util.*;
-
+import com.google.gson.Gson;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 public class HelloController {
     FinalResult fr;
     List<Huzas> huzasok = new ArrayList<>(); // EZ TARTALMAZZA AZ ÖSSZES SORSOLAST
     List<AnchorPane> anchorPaneList = new ArrayList<>();
     Popup popup = new Popup();
     Integer actualWeek;
+
     @FXML
     private VBox resultVbox, menuVBox;
     @FXML
@@ -36,14 +38,34 @@ public class HelloController {
     private AnchorPane menuAnchor, actualAnchor, tippAnchor, statAnchor, mainAnchor;
 
     @FXML
-    private TextField textNum1,textNum2,textNum3,textNum4,textNum5;
+    private TextField textNum1,textNum2,textNum3,textNum4,textNum5,tippNameText
+            ;
     @FXML
     private RadioButton radio1Button, radio2Button, radio3Button, radio4Button, radio5Button;
+
+    @FXML
+    protected void saveTipp() throws JsonProcessingException {
+
+        /*var sd = new SaveData("valami", Arrays.asList(1,2,3,4,5));
+        var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+        System.out.println(objectMapper.writeValueAsString(sd));*/
+        Torol torol = new Torol();
+        torol.setName("Valami");
+        torol.setAge(12);
+        ObjectMapper mapper = new ObjectMapper();
+        try {
+            String json = mapper.writeValueAsString(torol);
+            System.out.println("ResultingJSONstring = " + json);
+            //System.out.println(json);
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+    }
     @FXML
     protected void onStartButtonClick() throws IOException, URISyntaxException {
         Calendar cal = Calendar.getInstance();
-        DataBase db = new DataBase();
-        db.createDb();
+
+
 
         actualWeek = cal.get(Calendar.WEEK_OF_YEAR);
 

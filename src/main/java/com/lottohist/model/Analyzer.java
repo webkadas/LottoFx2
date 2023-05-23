@@ -19,12 +19,12 @@ public class Analyzer {
     }
 
 
-    public List<Map.Entry<Integer, Integer>> sortedListByKey(){   // VALUE szerint növekvő sorrend
+    public List<Map.Entry<Integer, Integer>> sortedListByKey(){   // KEY szerint növekvő sorrend
         List<Map.Entry<Integer, Integer>> nlist = new ArrayList<>(this.gyakorisag.entrySet());
         nlist.sort(Map.Entry.comparingByKey());
         return nlist;
     }
-    public List<Map.Entry<Integer, Integer>> sortedListByKeyRev(){   // VALUE szerint csökkenő sorrend
+    public List<Map.Entry<Integer, Integer>> sortedListByKeyRev(){   // KEY szerint csökkenő sorrend
         List<Map.Entry<Integer, Integer>> nlist = new ArrayList<>(this.gyakorisag.entrySet());
         nlist.sort(Map.Entry.comparingByKey(Comparator.reverseOrder()));
         return nlist;

@@ -144,6 +144,8 @@
                         </ScrollPane>
                         <Label fx:id="talalatDarabLabel" layoutX="11.0" layoutY="369.0" prefHeight="17.0" prefWidth="191.0" text="Találatok darabszáma" />
                         <Button fx:id="randomButton" layoutX="29.0" layoutY="103.0" mnemonicParsing="false" onAction="#randomNumber" text="random" />
+                        <TextField fx:id="tippNameText" layoutX="29.0" layoutY="33.0" promptText="tipp elnevezése" />
+                        <Button layoutX="226.0" layoutY="33.0" mnemonicParsing="false" onAction="#saveTipp" text="Mentés" />
                      </children>
                   </AnchorPane>
                </children>

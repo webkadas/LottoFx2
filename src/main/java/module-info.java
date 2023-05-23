@@ -3,7 +3,8 @@ module com.lottohist.lottomasodik {
     requires javafx.fxml;
     requires lombok;
     requires java.sql;
-    requires org.jdbi.v3.core;
+    requires com.fasterxml.jackson.databind;
+    requires com.google.gson;
 
 
     opens lottomasodik to javafx.fxml;
