@@ -1,6 +1,7 @@
 package lottomasodik;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.lottohist.model.*;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
@@ -11,8 +12,11 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.VBox;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
+import java.io.FileReader;
+import java.io.FileWriter;
 import com.google.gson.Gson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
@@ -22,6 +26,8 @@ public class HelloController {
     List<AnchorPane> anchorPaneList = new ArrayList<>();
     Popup popup = new Popup();
     Integer actualWeek;
+
+    List<SaveData> savedata = new ArrayList<>();
 
     @FXML
     private VBox resultVbox, menuVBox;
@@ -38,18 +44,41 @@ public class HelloController {
     private AnchorPane menuAnchor, actualAnchor, tippAnchor, statAnchor, mainAnchor;
 
     @FXML
-    private TextField textNum1,textNum2,textNum3,textNum4,textNum5,tippNameText
-            ;
+    private TextField textNum1,textNum2,textNum3,textNum4,textNum5,tippNameText;
     @FXML
     private RadioButton radio1Button, radio2Button, radio3Button, radio4Button, radio5Button;
 
     @FXML
-    protected void saveTipp() throws JsonProcessingException {
+    protected void saveTipp() throws IOException {
 
-        /*var sd = new SaveData("valami", Arrays.asList(1,2,3,4,5));
-        var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-        System.out.println(objectMapper.writeValueAsString(sd));*/
-        Torol torol = new Torol();
+       SaveData newSd = new SaveData(tippNameText.getText(),Arrays.asList(Integer.parseInt(textNum1.getText()),Integer.parseInt(textNum2.getText()),Integer.parseInt(textNum3.getText()),Integer.parseInt(textNum4.getText()),Integer.parseInt(textNum5.getText())));
+        if (newSd.nameLengthCheck() && newSd.numbersEqualityCheck() && newSd.numbersRangeCheck() && newSd.numbersFormatCheck()) {
+
+            savedata.add(newSd);
+            var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+            //var sd = new SaveData("kattra", Arrays.asList(10,22,33,51,90));
+
+            try (var writer = new FileWriter("movie.json")) {
+                objectMapper.writeValue(writer, savedata);
+            }
+        } else System.out.println("VALAMI NEM JÓ");
+
+
+        try {
+            // create object mapper instance
+            ObjectMapper mapper = new ObjectMapper();
+
+            // convert a JSON string to a Book object
+            savedata = mapper.readValue(Paths.get("movie.json").toFile(), new TypeReference<List<SaveData>>(){});
+
+            // print book
+            savedata.forEach(System.out::println );
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        /*Torol torol = new Torol();
         torol.setName("Valami");
         torol.setAge(12);
         ObjectMapper mapper = new ObjectMapper();
@@ -59,9 +88,10 @@ public class HelloController {
             //System.out.println(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }
+        }*/
     }
     @FXML
+
     protected void onStartButtonClick() throws IOException, URISyntaxException {
         Calendar cal = Calendar.getInstance();
 
@@ -69,7 +99,8 @@ public class HelloController {
 
         actualWeek = cal.get(Calendar.WEEK_OF_YEAR);
 
-
+        generateFakeTips();
+        System.out.println("Sajat tipp méret: "+savedata.size());
         try {
             File myObj = new File("src/main/resources/otos.csv");
             Scanner myReader = new Scanner(myObj);
@@ -87,6 +118,7 @@ public class HelloController {
 
 
     }
+
 
     @FXML private void randomNumber(){  // A RANDOM TIPPEKET GENERÁLJA
         radio1Button.setVisible(false);  // ELTŰNTETEM AZ ELŐZŐ EREDMÉNYEKET
@@ -124,10 +156,7 @@ public class HelloController {
         textNum1.setText(nums[0]+"");textNum2.setText(nums[1]+"");textNum3.setText(nums[2]+"");textNum4.setText(nums[3]+"");textNum5.setText(nums[4]+"");
     } // RANDOM TIPPEKET GENERÁLJA
 
-    @FXML
-    private void resultFromRadio(){
 
-    }
 
     @FXML
     private void onResultButtonClick(){
@@ -236,6 +265,8 @@ public class HelloController {
         Menu mTippCheck = new Menu("Tipp ellenőrzése");
         Menu mNumAppear = new Menu("Számok gyakorisága..");
 
+
+
         MenuItem mNumAppearGeneral = new MenuItem("Általános");
         MenuItem mNumAppearActual = new MenuItem("Aktuális hét");
 
@@ -306,7 +337,32 @@ public class HelloController {
             resultVbox.getChildren().add(textDate);
         }
     }
+    public void generateFakeTips() throws IOException {
 
+        try {
+            // create object mapper instance
+            ObjectMapper mapper = new ObjectMapper();
+
+            // convert a JSON string to a Book object
+            savedata = mapper.readValue(Paths.get("movie.json").toFile(), new TypeReference<List<SaveData>>(){});
+
+            // print book
+            savedata.forEach(System.out::println );
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        if (savedata.size()==0) {
+            savedata.add(new SaveData("szülinapok", Arrays.asList(10, 22, 33, 51, 90)));
+            savedata.add(new SaveData("szerencse", Arrays.asList(12, 24, 13, 81, 88)));
+            var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+            //var sd = new SaveData("kattra", Arrays.asList(10,22,33,51,90));
+
+            try (var writer = new FileWriter("movie.json")) {
+                objectMapper.writeValue(writer, savedata);
+            }
+        }
+    }
     @FXML
     private void getSelectedOrder(){
 

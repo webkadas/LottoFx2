@@ -6,7 +6,7 @@ module com.lottohist.lottomasodik {
     requires com.fasterxml.jackson.databind;
     requires com.google.gson;
 
-
+    exports com.lottohist.model;
     opens lottomasodik to javafx.fxml;
     exports lottomasodik;
 }

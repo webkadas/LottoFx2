@@ -15,24 +15,24 @@ public class SaveData {
         this.name = name;
         this.numbers = numbers;
     }
-    public boolean nameLengthCheck(String name){
-        if (name.length()<3) return false; else return true;
+    public boolean nameLengthCheck(){
+        if (this.name.length()<3) return false; else return true;
     }
 
-    public boolean numbersEqualityCheck(List<Integer> numbers){
+    public boolean numbersEqualityCheck(){
 
-        for (int i = 0; i < numbers.size(); i++) if (i>0) for (int j = 0; j <i; j++)  if (numbers.get(i)==numbers.get(j)) return false;
+        for (int i = 0; i < this.numbers.size(); i++) if (i>0) for (int j = 0; j <i; j++)  if (this.numbers.get(i)==this.numbers.get(j)) return false;
 
         return true;
     }
 
-    public boolean numbersRangeCheck(List<Integer> numbers){
-        for (int i = 0; i < numbers.size(); i++) if (numbers.get(i)>90 || numbers.get(i)<1) return false;
+    public boolean numbersRangeCheck(){
+        for (int i = 0; i < this.numbers.size(); i++) if (this.numbers.get(i)>90 || this.numbers.get(i)<1) return false;
         return true;
     }
 
-    public boolean numbersFormatCheck(List<Integer> numbers){
-        for (int i = 0; i < numbers.size(); i++) if (numbers.get(i).getClass()!=Integer.class) return false;
+    public boolean numbersFormatCheck(){
+        for (int i = 0; i < this.numbers.size(); i++) if (this.numbers.get(i).getClass()!=Integer.class) return false;
         return true;
     }
 

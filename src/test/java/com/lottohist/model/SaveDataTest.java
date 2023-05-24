@@ -15,27 +15,27 @@ class SaveDataTest {
 
     @BeforeEach
     void setUp() {
-         saveData = new SaveData();
+         saveData = new SaveData("saveDataTest",Arrays.asList(1,2,3,4,5));
     }
 
     @Test
     void nameLengthCheck() {
 
-        assertEquals(true,saveData.nameLengthCheck("saveDataTest"));
+        assertEquals(true,saveData.nameLengthCheck());
     }
 
     @Test
     void numbersEqualityCheck() {
-        assertEquals(true,saveData.numbersEqualityCheck(Arrays.asList(1,2,3,4,5)));
+        assertEquals(true,saveData.numbersEqualityCheck());
     }
 
     @Test
     void numbersRangeCheck() {
-        assertEquals(true,saveData.numbersRangeCheck(Arrays.asList(1,2,3,4,5)));
+        assertEquals(true,saveData.numbersRangeCheck());
     }
 
     @Test
     void numbersFormatCheck() {
-        assertEquals(true,saveData.numbersFormatCheck(Arrays.asList(1,2,3,4,5)));
+        assertEquals(true,saveData.numbersFormatCheck());
     }
 }
