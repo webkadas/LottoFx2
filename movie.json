@@ -2,45 +2,12 @@
   "name" : "szülinapok",
   "numbers" : [ 10, 22, 33, 51, 90 ]
 }, {
-  "name" : "szerencse",
+  "name" : "szerencseszámok",
   "numbers" : [ 12, 24, 13, 81, 88 ]
 }, {
-  "name" : "hhfgh",
-  "numbers" : [ 70, 7, 9, 54, 32 ]
+  "name" : "sajat1",
+  "numbers" : [ 22, 58, 11, 26, 3 ]
 }, {
-  "name" : "trzrtz",
-  "numbers" : [ 58, 60, 73, 37, 7 ]
-}, {
-  "name" : "valami",
-  "numbers" : [ 18, 30, 90, 57, 27 ]
-}, {
-  "name" : "eqeqeqeqe",
-  "numbers" : [ 9, 41, 16, 15, 39 ]
-}, {
-  "name" : "222222222",
-  "numbers" : [ 31, 69, 34, 54, 77 ]
-}, {
-  "name" : "zztrzrtz",
-  "numbers" : [ 6, 45, 47, 15, 1 ]
-}, {
-  "name" : "hgfhfghfgh",
-  "numbers" : [ 9, 12, 88, 70, 30 ]
-}, {
-  "name" : "333333",
-  "numbers" : [ 53, 87, 15, 80, 6 ]
-}, {
-  "name" : "4444",
-  "numbers" : [ 83, 16, 87, 44, 70 ]
-}, {
-  "name" : "adasd",
-  "numbers" : [ 23, 62, 1, 66, 3 ]
-}, {
-  "name" : "ererer",
-  "numbers" : [ 6, 2, 47, 15, 1 ]
-}, {
-  "name" : "sdsdsdsd",
-  "numbers" : [ 19, 86, 3, 4, 48 ]
-}, {
-  "name" : "cccx",
-  "numbers" : [ 90, 1, 21, 43, 41 ]
+  "name" : "sajat2",
+  "numbers" : [ 23, 62, 86, 17, 44 ]
 } ]

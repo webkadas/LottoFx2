@@ -32,6 +32,7 @@ public class HelloController {
     ObservableList<String> custom_names = FXCollections.observableArrayList(); // Lista a comboboxba töltéshez
     List<SaveData> savedata = new ArrayList<>();
     ComboBox comboSaveData = new ComboBox();
+
     @FXML
     private VBox resultVbox, menuVBox;
 
@@ -62,7 +63,13 @@ public class HelloController {
 
             try (var writer = new FileWriter("movie.json")) {
                 objectMapper.writeValue(writer, savedata);
-                comboSaveData.getItems().add(newSd.getName());
+                comboSaveData.setValue(null);
+
+                custom_names.clear();
+                for (SaveData x : savedata){
+                    custom_names.add(x.getName());
+                }
+                comboSaveData.setItems(custom_names);
                 popup.setLabel("Adatok mentve","Siker");
                 popup.display();
             }
@@ -513,12 +520,17 @@ public class HelloController {
         return result;
     }*/
     public void ComboboxCreate(){
-        comboPane.getChildren().removeAll();
-        comboSaveData.getItems().removeAll();
+        comboPane.getChildren().remove(comboSaveData);
+        System.out.println("ELTÁVOLÍTVA");
+        comboSaveData.getSelectionModel().clearSelection();
+        System.out.println("KIÜRÍTVE");
         for (SaveData x : savedata) custom_names.add(x.getName());
         comboSaveData.setItems(custom_names);
+        System.out.println("FELTÖLTVE");
         //comboSaveData.setItems((ObservableList<SaveData>) savedata);
         comboPane.getChildren().add(comboSaveData);
+        System.out.println("HOZZÁADVA");
+
     }
 
     EventHandler<ActionEvent> event =
