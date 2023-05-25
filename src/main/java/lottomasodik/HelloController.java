@@ -3,6 +3,8 @@ package lottomasodik;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.lottohist.model.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
@@ -24,12 +26,12 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class HelloController {
     FinalResult fr;
     List<Huzas> huzasok = new ArrayList<>(); // EZ TARTALMAZZA AZ ÖSSZES SORSOLAST
-    List<AnchorPane> anchorPaneList = new ArrayList<>();
+    List<AnchorPane> anchorPaneList = new ArrayList<>(); // lista a Pane-ek kapcsolgatásához
     Popup popup = new Popup();
     Integer actualWeek;
-
+    ObservableList<String> custom_names = FXCollections.observableArrayList(); // Lista a comboboxba töltéshez
     List<SaveData> savedata = new ArrayList<>();
-
+    ComboBox comboSaveData = new ComboBox();
     @FXML
     private VBox resultVbox, menuVBox;
 
@@ -41,7 +43,7 @@ public class HelloController {
     private Button startButton, sajatTippButton, altSzamNovButton;
 
     @FXML
-    private AnchorPane menuAnchor, actualAnchor, tippAnchor, statAnchor, mainAnchor;
+    private AnchorPane menuAnchor, actualAnchor, tippAnchor, statAnchor, mainAnchor, comboPane;
 
     @FXML
     private TextField textNum1,textNum2,textNum3,textNum4,textNum5,tippNameText;
@@ -60,23 +62,12 @@ public class HelloController {
 
             try (var writer = new FileWriter("movie.json")) {
                 objectMapper.writeValue(writer, savedata);
+                comboSaveData.getItems().add(newSd.getName());
             }
         } else { popup.setLabel("Legalább 3 betű a név, valamint 1-90ig különböző számok","Formátum hiba"); popup.display();}  // MENTÉSKORI HIBA
 
 
-        try {
-            // create object mapper instance
-            ObjectMapper mapper = new ObjectMapper();
 
-            // convert a JSON string to a Book object
-            savedata = mapper.readValue(Paths.get("movie.json").toFile(), new TypeReference<List<SaveData>>(){});
-
-            // print book
-            savedata.forEach(System.out::println );
-
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
 
         /*Torol torol = new Torol();
         torol.setName("Valami");
@@ -89,17 +80,18 @@ public class HelloController {
         } catch (JsonProcessingException e) {
             e.printStackTrace();
         }*/
+
     }
     @FXML
 
     protected void onStartButtonClick() throws IOException, URISyntaxException {
         Calendar cal = Calendar.getInstance();
-
-
-
         actualWeek = cal.get(Calendar.WEEK_OF_YEAR);
         actualWeekLabel.setText("Aktuális hét: "+actualWeek);
         generateFakeTips();
+
+        comboSaveData.setOnAction(event);
+
         System.out.println("Sajat tipp méret: "+savedata.size());
         try {
             File myObj = new File("src/main/resources/otos.csv");
@@ -335,9 +327,12 @@ public class HelloController {
             var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
             //var sd = new SaveData("kattra", Arrays.asList(10,22,33,51,90));
 
+
             try (var writer = new FileWriter("movie.json")) {
                 objectMapper.writeValue(writer, savedata);
             }
+
+
         }
     }
     @FXML
@@ -353,6 +348,10 @@ public class HelloController {
     @FXML
     protected void sajatTippButton(){
         activatePane("tippAnchor");
+        comboPane.getChildren().removeAll();
+    ComboboxCreate();
+
+
     }
 
    // ÁLTALÁNOS STATISZTIKA GOMB ESEMÉNYEK
@@ -400,6 +399,7 @@ public class HelloController {
     protected void actSzamNov(){
         activatePane("actualAnchor");
         List<Huzas> actualHuzasok = new ArrayList<>();
+     //   actualWeekSuggestion(actualHuzasok);
         gyakorisagActualListView.getItems().clear();
 
         for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
@@ -436,6 +436,7 @@ public class HelloController {
     protected void actElofNov(){
         activatePane("statAnchor");activatePane("actualAnchor");
         List<Huzas> actualHuzasok = new ArrayList<>();
+
         gyakorisagActualListView.getItems().clear();
 
         for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
@@ -468,5 +469,52 @@ public class HelloController {
 
     // ÁLTALÁNOS STATISZTIKA GOMB ESEMÉNYEK VÉGE
 
+    /*
+    public void actualWeekSuggestion(List<Huzas> actualHuzasok){
+        Analyzer gyakorisag = new Analyzer(actualHuzasok);
+        List<Integer> fiveRandomTipp = new ArrayList<>();
+        int gyakFigyelo=0, i=-1;
 
+
+        while (gyakFigyelo<5) {
+            i++;
+            if (i == 0) fiveRandomTipp.add(gyakorisag.sortedListByValueRev().get(i).getKey());
+            else {
+                if (gyakorisag.sortedListByValueRev().get(i).getValue() != gyakorisag.sortedListByValueRev().get(i - 1).getValue()) gyakFigyelo += 1;
+
+            }
+            if (gyakFigyelo<5) fiveRandomTipp.add(gyakorisag.sortedListByValueRev().get(i).getKey());
+
+        }
+
+        suggestLabel.setText("Javaslat a hétre: "+suggestForWeek(fiveRandomTipp));
+    }*/
+    /*private String suggestForWeek(List<Integer> numbers){ // NEM MŰKÖDIK
+        String result="";
+        Random rand = new Random();
+        int rng = 0;
+        for (int i = 0; i < 5; i++) {
+            rng = rand.nextInt(numbers.size()-1);
+            result += String.valueOf(numbers.get(rng))+" ";
+            numbers.remove(rng);
+        }
+
+
+        return result;
+    }*/
+    public void ComboboxCreate(){
+        comboPane.getChildren().removeAll();
+        for (SaveData x : savedata) custom_names.add(x.getName());
+        comboSaveData.setItems(custom_names);
+        //comboSaveData.setItems((ObservableList<SaveData>) savedata);
+        comboPane.getChildren().add(comboSaveData);
+    }
+
+    EventHandler<ActionEvent> event =
+            new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent e)
+                {
+                    System.out.println(comboSaveData.getValue());
+                }
+            };
 }
