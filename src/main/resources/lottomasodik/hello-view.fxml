@@ -17,11 +17,11 @@
 <?import javafx.scene.shape.Line?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="916.0" xmlns="http://javafx.com/javafx/19" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lottomasodik.HelloController">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="916.0" xmlns="http://javafx.com/javafx/18" xmlns:fx="http://javafx.com/fxml/1" fx:controller="lottomasodik.HelloController">
    <children>
       <SplitPane dividerPositions="0.5" prefHeight="400.0" prefWidth="600.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
          <items>
-            <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="398.0" prefWidth="153.0">
+            <AnchorPane fx:id="menuAnchor" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="398.0" prefWidth="153.0" visible="false">
                <children>
                   <VBox prefHeight="398.0" prefWidth="153.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
@@ -54,7 +54,7 @@
                         <Button mnemonicParsing="false" onAction="#actElofCsokk" prefHeight="29.0" prefWidth="153.0" text="Előfordulás sz. csökkenő" />
                      </children>
                   </VBox>
-                  <AnchorPane fx:id="menuAnchor" prefHeight="400.0" prefWidth="492.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+                  <AnchorPane prefHeight="400.0" prefWidth="492.0" visible="false" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                      <children>
                         <VBox fx:id="menuVBox" prefHeight="398.0" prefWidth="100.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
                            <children>
@@ -88,6 +88,11 @@
                               <Insets bottom="20.0" left="20.0" right="20.0" top="20.0" />
                            </padding>
                            <children>
+                              <Label alignment="CENTER" prefHeight="81.0" prefWidth="520.0" text="A kezdéshez kattintson az alábbi gombra" textOverrun="WORD_ELLIPSIS">
+                                 <font>
+                                    <Font size="28.0" />
+                                 </font>
+                              </Label>
                               <Button fx:id="startButton" onAction="#onStartButtonClick" text="Adatbázis betöltése" />
                            </children>
                         </VBox>

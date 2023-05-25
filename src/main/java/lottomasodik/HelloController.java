@@ -38,7 +38,7 @@ public class HelloController {
     @FXML
     ListView gyakorisagListView,gyakorisagActualListView;
     @FXML
-    private Label welcomeText, suggestLabel, actualWeekLabel;
+    private Label welcomeText, talalatDarabLabel, actualWeekLabel;
     @FXML
     private Button startButton, sajatTippButton, altSzamNovButton;
 
@@ -63,6 +63,8 @@ public class HelloController {
             try (var writer = new FileWriter("movie.json")) {
                 objectMapper.writeValue(writer, savedata);
                 comboSaveData.getItems().add(newSd.getName());
+                popup.setLabel("Adatok mentve","Siker");
+                popup.display();
             }
         } else { popup.setLabel("Legalább 3 betű a név, valamint 1-90ig különböző számok","Formátum hiba"); popup.display();}  // MENTÉSKORI HIBA
 
@@ -100,7 +102,8 @@ public class HelloController {
             myReader.close();
             startButton.setVisible(false); // START BUTTON KIKAPCSOLÁS
             anchorPaneList.add(tippAnchor);anchorPaneList.add(statAnchor);anchorPaneList.add(mainAnchor);anchorPaneList.add(actualAnchor);
-            activatePane("menuAnchor");
+
+            menuAnchor.setVisible(true);
 
 
         } catch (FileNotFoundException e) {
@@ -286,14 +289,20 @@ public class HelloController {
         Node node = (Node) e.getSource();
         if (node.getId().equals("radio1Button")){
             eredmenyKiir(fr.getTalalatok1());
+            talalatDarabLabel.setText("Találatok száma: "+fr.getTalalatok1().size());
         } else if (node.getId().equals("radio2Button")){
             eredmenyKiir(fr.getTalalatok2());
+            talalatDarabLabel.setText("Találatok száma: "+fr.getTalalatok2().size());
         } else if (node.getId().equals("radio3Button")){
             eredmenyKiir(fr.getTalalatok3());
+            talalatDarabLabel.setText("Találatok száma: "+fr.getTalalatok3().size());
         } else if (node.getId().equals("radio4Button")){
             eredmenyKiir(fr.getTalalatok4());
+            talalatDarabLabel.setText("Találatok száma: "+fr.getTalalatok4().size());
         } else {
             eredmenyKiir(fr.getTalalatok5());
+            talalatDarabLabel.setText("Találatok száma: "+fr.getTalalatok5().size());
+
         }
     }
     private void eredmenyKiir(List<Huzas> talalatok) {
@@ -349,7 +358,8 @@ public class HelloController {
     protected void sajatTippButton(){
         activatePane("tippAnchor");
         comboPane.getChildren().removeAll();
-    ComboboxCreate();
+        comboSaveData.getItems().removeAll();
+        ComboboxCreate();
 
 
     }
@@ -504,6 +514,7 @@ public class HelloController {
     }*/
     public void ComboboxCreate(){
         comboPane.getChildren().removeAll();
+        comboSaveData.getItems().removeAll();
         for (SaveData x : savedata) custom_names.add(x.getName());
         comboSaveData.setItems(custom_names);
         //comboSaveData.setItems((ObservableList<SaveData>) savedata);
@@ -514,7 +525,17 @@ public class HelloController {
             new EventHandler<ActionEvent>() {
                 public void handle(ActionEvent e)
                 {
-                    System.out.println(comboSaveData.getValue());
+
+                    for(SaveData x: savedata){
+                        if (x.getName().equals(comboSaveData.getValue())){
+                            textNum1.setText(x.getNumbers().get(0)+"");
+                            textNum2.setText(x.getNumbers().get(1)+"");
+                            textNum3.setText(x.getNumbers().get(2)+"");
+                            textNum4.setText(x.getNumbers().get(3)+"");
+                            textNum5.setText(x.getNumbers().get(4)+"");
+                            break;
+                        }
+                    }
                 }
             };
 }

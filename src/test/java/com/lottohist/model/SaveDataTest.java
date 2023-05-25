@@ -15,7 +15,7 @@ class SaveDataTest {
 
     @BeforeEach
     void setUp() {
-         saveData = new SaveData("saveDataTest",Arrays.asList(1,2,3,4,5));
+         saveData = new SaveData("save",Arrays.asList(1,2,3,4,5));
     }
 
     @Test

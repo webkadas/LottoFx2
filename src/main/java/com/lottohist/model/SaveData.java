@@ -32,7 +32,12 @@ public class SaveData {
     }
 
     public boolean numbersFormatCheck(){
-        for (int i = 0; i < this.numbers.size(); i++) if (this.numbers.get(i).getClass()!=Integer.class) return false;
+        for (int i = 0; i < this.numbers.size(); i++) if (this.numbers.get(i).getClass()!=Integer.class) {
+            Popup popup = new Popup();
+            popup.setLabel("Csak számjegyek (1-90)","Formátum hiba");
+            popup.display();
+            return false;
+        }
         return true;
     }
 
