@@ -1,55 +1,75 @@
 package lottomasodik;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.lottohist.model.*;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.scene.Node;
 import javafx.scene.control.*;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import java.io.*;
 import java.net.*;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.*;
+import java.io.FileReader;
+import java.io.FileWriter;
 import com.google.gson.Gson;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 public class HelloController {
     FinalResult fr;
     List<Huzas> huzasok = new ArrayList<>(); // EZ TARTALMAZZA AZ ÖSSZES SORSOLAST
-    List<AnchorPane> anchorPaneList = new ArrayList<>();
+    List<AnchorPane> anchorPaneList = new ArrayList<>(); // lista a Pane-ek kapcsolgatásához
     Popup popup = new Popup();
     Integer actualWeek;
-
+    ObservableList<String> custom_names = FXCollections.observableArrayList(); // Lista a comboboxba töltéshez
+    List<SaveData> savedata = new ArrayList<>();
+    ComboBox comboSaveData = new ComboBox();
     @FXML
     private VBox resultVbox, menuVBox;
+
     @FXML
     ListView gyakorisagListView,gyakorisagActualListView;
     @FXML
-    private Label welcomeText, suggestLabel;
+    private Label welcomeText, suggestLabel, actualWeekLabel;
     @FXML
-    private Button startButton;
+    private Button startButton, sajatTippButton, altSzamNovButton;
 
     @FXML
-    ComboBox orderCombo,orderComboActual;
-    @FXML
-    private AnchorPane menuAnchor, actualAnchor, tippAnchor, statAnchor, mainAnchor;
+    private AnchorPane menuAnchor, actualAnchor, tippAnchor, statAnchor, mainAnchor, comboPane;
 
     @FXML
-    private TextField textNum1,textNum2,textNum3,textNum4,textNum5,tippNameText
-            ;
+    private TextField textNum1,textNum2,textNum3,textNum4,textNum5,tippNameText;
     @FXML
     private RadioButton radio1Button, radio2Button, radio3Button, radio4Button, radio5Button;
 
     @FXML
-    protected void saveTipp() throws JsonProcessingException {
+    protected void saveTipp() throws IOException {
 
-        var sd = new SaveData("valami", Arrays.asList(1,2,3,4,5));
-        var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
-        System.out.println(objectMapper.writeValueAsString(sd));
-       /* Torol torol = new Torol();
+       SaveData newSd = new SaveData(tippNameText.getText(),Arrays.asList(Integer.parseInt(textNum1.getText()),Integer.parseInt(textNum2.getText()),Integer.parseInt(textNum3.getText()),Integer.parseInt(textNum4.getText()),Integer.parseInt(textNum5.getText())));
+        if (newSd.nameLengthCheck() && newSd.numbersEqualityCheck() && newSd.numbersRangeCheck() && newSd.numbersFormatCheck()) {
+
+            savedata.add(newSd);
+            var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+            //var sd = new SaveData("kattra", Arrays.asList(10,22,33,51,90));
+
+            try (var writer = new FileWriter("movie.json")) {
+                objectMapper.writeValue(writer, savedata);
+                comboSaveData.getItems().add(newSd.getName());
+            }
+        } else { popup.setLabel("Legalább 3 betű a név, valamint 1-90ig különböző számok","Formátum hiba"); popup.display();}  // MENTÉSKORI HIBA
+
+
+
+
+        /*Torol torol = new Torol();
         torol.setName("Valami");
         torol.setAge(12);
         ObjectMapper mapper = new ObjectMapper();
@@ -59,19 +79,20 @@ public class HelloController {
             //System.out.println(json);
         } catch (JsonProcessingException e) {
             e.printStackTrace();
-        }
+        }*/
 
-        */
     }
     @FXML
+
     protected void onStartButtonClick() throws IOException, URISyntaxException {
         Calendar cal = Calendar.getInstance();
-
-
-
         actualWeek = cal.get(Calendar.WEEK_OF_YEAR);
+        actualWeekLabel.setText("Aktuális hét: "+actualWeek);
+        generateFakeTips();
 
+        comboSaveData.setOnAction(event);
 
+        System.out.println("Sajat tipp méret: "+savedata.size());
         try {
             File myObj = new File("src/main/resources/otos.csv");
             Scanner myReader = new Scanner(myObj);
@@ -80,7 +101,7 @@ public class HelloController {
             startButton.setVisible(false); // START BUTTON KIKAPCSOLÁS
             anchorPaneList.add(tippAnchor);anchorPaneList.add(statAnchor);anchorPaneList.add(mainAnchor);anchorPaneList.add(actualAnchor);
             activatePane("menuAnchor");
-            createMenu(); // MENÜ KÉSZÍTÉS
+
 
         } catch (FileNotFoundException e) {
             welcomeText.setText("Nem létező vagy hibás fájl");
@@ -89,6 +110,7 @@ public class HelloController {
 
 
     }
+
 
     @FXML private void randomNumber(){  // A RANDOM TIPPEKET GENERÁLJA
         radio1Button.setVisible(false);  // ELTŰNTETEM AZ ELŐZŐ EREDMÉNYEKET
@@ -126,10 +148,7 @@ public class HelloController {
         textNum1.setText(nums[0]+"");textNum2.setText(nums[1]+"");textNum3.setText(nums[2]+"");textNum4.setText(nums[3]+"");textNum5.setText(nums[4]+"");
     } // RANDOM TIPPEKET GENERÁLJA
 
-    @FXML
-    private void resultFromRadio(){
 
-    }
 
     @FXML
     private void onResultButtonClick(){
@@ -234,28 +253,7 @@ public class HelloController {
 
     }
 
-    public void createMenu(){
-        Menu mTippCheck = new Menu("Tipp ellenőrzése");
-        Menu mNumAppear = new Menu("Számok gyakorisága..");
 
-        MenuItem mNumAppearGeneral = new MenuItem("Általános");
-        MenuItem mNumAppearActual = new MenuItem("Aktuális hét");
-
-        MenuItem mTippCustom = new MenuItem("Saját / Random tippek");
-        mTippCustom.setOnAction(event);
-        mNumAppearGeneral.setOnAction(event);
-        mNumAppearActual.setOnAction(event);
-
-    // create a menubar
-        MenuBar mb = new MenuBar();
-        mNumAppear.getItems().add(mNumAppearGeneral);
-        mNumAppear.getItems().add(mNumAppearActual);
-        mTippCheck.getItems().add(mTippCustom);
-        mb.getMenus().add(mTippCheck);
-        mb.getMenus().add(mNumAppear);
-        menuVBox.getChildren().add(mb);
-        menuVBox.setVisible(true);
-    }
     public Boolean isNumberCheck(String tipp){
         boolean result = true;
         Integer szam=0;
@@ -308,110 +306,215 @@ public class HelloController {
             resultVbox.getChildren().add(textDate);
         }
     }
+    public void generateFakeTips() throws IOException {
 
+        try {
+            // create object mapper instance
+            ObjectMapper mapper = new ObjectMapper();
+
+            // convert a JSON string to a Book object
+            savedata = mapper.readValue(Paths.get("movie.json").toFile(), new TypeReference<List<SaveData>>(){});
+
+            // print book
+            savedata.forEach(System.out::println );
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        if (savedata.size()==0) {
+            savedata.add(new SaveData("szülinapok", Arrays.asList(10, 22, 33, 51, 90)));
+            savedata.add(new SaveData("szerencse", Arrays.asList(12, 24, 13, 81, 88)));
+            var objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+            //var sd = new SaveData("kattra", Arrays.asList(10,22,33,51,90));
+
+
+            try (var writer = new FileWriter("movie.json")) {
+                objectMapper.writeValue(writer, savedata);
+            }
+
+
+        }
+    }
     @FXML
     private void getSelectedOrder(){
 
     }
 
 
-    @FXML
-    protected void getSelectedOrder(ActionEvent event){  // ÁLTALÁNOS COMBOBOX EVENTEK
 
-        if (orderCombo.getSelectionModel().getSelectedIndex()==0){
-            gyakorisagListView.getItems().clear();
-            Analyzer gyakorisag = new Analyzer(huzasok);
-            for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByKey()){
-                gyakorisagListView.getItems().add(x);
-            }
+
+
+
+    @FXML
+    protected void sajatTippButton(){
+        activatePane("tippAnchor");
+        comboPane.getChildren().removeAll();
+    ComboboxCreate();
+
+
+    }
+
+   // ÁLTALÁNOS STATISZTIKA GOMB ESEMÉNYEK
+    @FXML
+    protected void altSzamNov(){
+        activatePane("statAnchor");
+        gyakorisagListView.getItems().clear();
+        Analyzer gyakorisag = new Analyzer(huzasok);
+        for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByKey()){
+            gyakorisagListView.getItems().add(x);
         }
-        if (orderCombo.getSelectionModel().getSelectedIndex()==1){
-            gyakorisagListView.getItems().clear();
-            Analyzer gyakorisag = new Analyzer(huzasok);
-            for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByKeyRev()){
-                gyakorisagListView.getItems().add(x);
-            }
+    }
+    @FXML
+    protected void altSzamCsokk(){
+        activatePane("statAnchor");
+        gyakorisagListView.getItems().clear();
+        Analyzer gyakorisag = new Analyzer(huzasok);
+        for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByKeyRev()){
+            gyakorisagListView.getItems().add(x);
         }
-        if (orderCombo.getSelectionModel().getSelectedIndex()==2){
-            gyakorisagListView.getItems().clear();
-            Analyzer gyakorisag = new Analyzer(huzasok);
-            for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByValue()){
-                gyakorisagListView.getItems().add(x);
-            }
+    }
+    @FXML
+    protected void altElofNov(){
+        activatePane("statAnchor");
+        gyakorisagListView.getItems().clear();
+        Analyzer gyakorisag = new Analyzer(huzasok);
+        for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByValue()){
+            gyakorisagListView.getItems().add(x);
         }
-        if (orderCombo.getSelectionModel().getSelectedIndex()==3){
-            gyakorisagListView.getItems().clear();
-            Analyzer gyakorisag = new Analyzer(huzasok);
-            for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByValueRev()){
-                gyakorisagListView.getItems().add(x);
-            }
+    }
+    @FXML
+    protected void altElofCsokk(){
+        activatePane("statAnchor");
+        gyakorisagListView.getItems().clear();
+        Analyzer gyakorisag = new Analyzer(huzasok);
+        for (Map.Entry<Integer, Integer> x:gyakorisag.sortedListByValueRev()){
+            gyakorisagListView.getItems().add(x);
         }
     }
 
-    @FXML
-    protected void getSelectedOrderActual(ActionEvent event){
+    // ÁLTALÁNOS STATISZTIKA GOMB ESEMÉNYEK VÉGE
 
+    // AKTUÁLIS HETI STATISZTIKA GOMB ESEMÉNYEK
+    @FXML
+    protected void actSzamNov(){
+        activatePane("actualAnchor");
         List<Huzas> actualHuzasok = new ArrayList<>();
-        if (orderComboActual.getSelectionModel().getSelectedIndex()==0){
-            gyakorisagActualListView.getItems().clear();
+     //   actualWeekSuggestion(actualHuzasok);
+        gyakorisagActualListView.getItems().clear();
 
-            for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
-                if (x.getWeek()==actualWeek) {
-                    actualHuzasok.add(x);
-                }
-
+        for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
+            if (x.getWeek()==actualWeek) {
+                actualHuzasok.add(x);
             }
 
-            Analyzer gyakorisag = new Analyzer(actualHuzasok);
-            for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByKey()){
-                gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
-            }
-        }
-        if (orderComboActual.getSelectionModel().getSelectedIndex()==1){
-            gyakorisagActualListView.getItems().clear();
-
-            for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
-                if (x.getWeek()==actualWeek) {
-                    actualHuzasok.add(x);
-                }
-
-            }
-
-            Analyzer gyakorisag = new Analyzer(actualHuzasok);
-            for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByValue()){
-                gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
-            }
-        }
-        if (orderComboActual.getSelectionModel().getSelectedIndex()==2){
-            gyakorisagActualListView.getItems().clear();
-
-            for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
-                if (x.getWeek()==actualWeek) {
-                    actualHuzasok.add(x);
-                }
-
-            }
-            Analyzer gyakorisag = new Analyzer(actualHuzasok);
-            for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByValueRev()){
-                gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
-            }
         }
 
+        Analyzer gyakorisag = new Analyzer(actualHuzasok);
+        for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByKey()){
+            gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
+        }
+    }
+    @FXML
+    protected void actSzamCsokk(){
+        activatePane("actualAnchor");
+        List<Huzas> actualHuzasok = new ArrayList<>();
+        gyakorisagActualListView.getItems().clear();
+
+        for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
+            if (x.getWeek()==actualWeek) {
+                actualHuzasok.add(x);
+            }
+
+        }
+
+        Analyzer gyakorisag = new Analyzer(actualHuzasok);
+        for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByKeyRev()){
+            gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
+        }
+    }
+    @FXML
+    protected void actElofNov(){
+        activatePane("statAnchor");activatePane("actualAnchor");
+        List<Huzas> actualHuzasok = new ArrayList<>();
+
+        gyakorisagActualListView.getItems().clear();
+
+        for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
+            if (x.getWeek()==actualWeek) {
+                actualHuzasok.add(x);
+            }
+
+        }
+        Analyzer gyakorisag = new Analyzer(actualHuzasok);
+        for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByValue()){
+            gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
+        }
+    }
+    @FXML
+    protected void actElofCsokk(){
+        activatePane("actualAnchor");
+        gyakorisagActualListView.getItems().clear();
+        List<Huzas> actualHuzasok = new ArrayList<>();
+        for (Huzas x:huzasok){  // az aktuális hét húzásait külön LIST-be teszi
+            if (x.getWeek()==actualWeek) {
+                actualHuzasok.add(x);
+            }
+
+        }
+        Analyzer gyakorisag = new Analyzer(actualHuzasok);
+        for (Map.Entry<Integer, Integer> y:gyakorisag.sortedListByValueRev()){
+            gyakorisagActualListView.getItems().add("#"+y.getKey()+" - " + y.getValue()+" db.");
+        }
     }
 
-    EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
-        public void handle(ActionEvent e) {
+    // ÁLTALÁNOS STATISZTIKA GOMB ESEMÉNYEK VÉGE
 
-            if (((MenuItem) e.getSource()).getText().equals("Saját / Random tippek")) activatePane("tippAnchor");
-            if (((MenuItem) e.getSource()).getText().equals("Általános")) {activatePane("statAnchor");orderCombo.getItems().add("szám növekvő");
-                orderCombo.getItems().add("szám csökkenő");
-                orderCombo.getItems().add("előfodulás alapján növekvő");
-                orderCombo.getItems().add("előfodulás alapján csökkenő");}
-            if (((MenuItem) e.getSource()).getText().equals("Aktuális hét")) {activatePane("actualAnchor");orderComboActual.getItems().add("szám szerint növekvő");
-                orderComboActual.getItems().add("gyakoriság szerint növekvő");
-                orderComboActual.getItems().add("gyakoriság szerint csökkenő");}
+    /*
+    public void actualWeekSuggestion(List<Huzas> actualHuzasok){
+        Analyzer gyakorisag = new Analyzer(actualHuzasok);
+        List<Integer> fiveRandomTipp = new ArrayList<>();
+        int gyakFigyelo=0, i=-1;
 
+
+        while (gyakFigyelo<5) {
+            i++;
+            if (i == 0) fiveRandomTipp.add(gyakorisag.sortedListByValueRev().get(i).getKey());
+            else {
+                if (gyakorisag.sortedListByValueRev().get(i).getValue() != gyakorisag.sortedListByValueRev().get(i - 1).getValue()) gyakFigyelo += 1;
+
+            }
+            if (gyakFigyelo<5) fiveRandomTipp.add(gyakorisag.sortedListByValueRev().get(i).getKey());
 
         }
-    };
+
+        suggestLabel.setText("Javaslat a hétre: "+suggestForWeek(fiveRandomTipp));
+    }*/
+    /*private String suggestForWeek(List<Integer> numbers){ // NEM MŰKÖDIK
+        String result="";
+        Random rand = new Random();
+        int rng = 0;
+        for (int i = 0; i < 5; i++) {
+            rng = rand.nextInt(numbers.size()-1);
+            result += String.valueOf(numbers.get(rng))+" ";
+            numbers.remove(rng);
+        }
+
+
+        return result;
+    }*/
+    public void ComboboxCreate(){
+        comboPane.getChildren().removeAll();
+        for (SaveData x : savedata) custom_names.add(x.getName());
+        comboSaveData.setItems(custom_names);
+        //comboSaveData.setItems((ObservableList<SaveData>) savedata);
+        comboPane.getChildren().add(comboSaveData);
+    }
+
+    EventHandler<ActionEvent> event =
+            new EventHandler<ActionEvent>() {
+                public void handle(ActionEvent e)
+                {
+                    System.out.println(comboSaveData.getValue());
+                }
+            };
 }

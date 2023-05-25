@@ -1,0 +1,7 @@
+[ {
+  "name" : "szülinapok",
+  "numbers" : [ 10, 22, 33, 51, 90 ]
+}, {
+  "name" : "szerencse",
+  "numbers" : [ 12, 24, 13, 81, 88 ]
+} ]
